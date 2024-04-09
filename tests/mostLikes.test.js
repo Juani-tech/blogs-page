@@ -37,7 +37,7 @@ describe("most likes", () => {
     expect(result).toEqual(listWithMoreThanOneBlog[1]);
   });
 
-  test("aaa", () => {
+  test("of a list with multiple blogs gets result correctly", () => {
     const listWithOneMoreBlogFromDijkstra = [
       ...listWithMoreThanOneBlog,
       {
