@@ -38,4 +38,17 @@ const mostBlogs = (blogs) => {
   return { author: result, blogs: lodash.countBy(authors)[result] };
 };
 
-module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs };
+// Define una función llamada mostLikes que reciba una lista de blogs como parámetro. La función devuelve el autor, cuyas publicaciones de blog tienen la mayor cantidad de me gusta. El valor de retorno también contiene el número total de likes que el autor ha recibido:
+
+const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return null;
+  }
+  const authors = lodash.groupBy(blogs, "author");
+  const result = lodash.maxBy(lodash.keys(authors), (author) =>
+    lodash.sumBy(authors[author], "likes")
+  );
+  return authors[result][0];
+};
+
+module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes };
