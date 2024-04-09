@@ -1,3 +1,5 @@
+const lodash = require("lodash");
+
 const dummy = (blogs) => {
   return 1;
 };
@@ -21,4 +23,19 @@ const favoriteBlog = (blogs) => {
   );
   return resultWithReduce;
 };
-module.exports = { dummy, totalLikes, favoriteBlog };
+
+//Define una función llamada mostBlogs que reciba una lista de blogs como parámetro. La función devuelve el author que tiene la mayor cantidad de blogs. El valor de retorno también contiene el número de blogs que tiene el autor principal:
+
+const mostBlogs = (blogs) => {
+  if (blogs.length === 0) {
+    return null;
+  }
+  const authors = blogs.map((blog) => blog.author);
+  const result = lodash.maxBy(
+    lodash.keys(lodash.countBy(authors)),
+    (author) => lodash.countBy(authors)[author]
+  );
+  return { author: result, blogs: lodash.countBy(authors)[result] };
+};
+
+module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs };
