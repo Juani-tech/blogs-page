@@ -59,6 +59,35 @@ test("blogs are posted correctly", async () => {
   expect(likes).toContain(7);
 });
 
+test("undefined likes are saved as zero", async () => {
+  const newBlog = {
+    title: "async/await refactors",
+    author: "Juani",
+    url: "https://someurl.com",
+  };
+
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const blogsAtEnd = await helper.blogsInDb();
+
+  const likes = blogsAtEnd.map((blog) => {
+    return blog.likes;
+  });
+
+  expect(likes).toContain(0);
+});
+
+test("undefined title or url gets 400 status code", async () => {
+  const newBlog = {
+    title: "async/await refactors",
+  };
+  await api.post("/api/blogs").send(newBlog).expect(400);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
