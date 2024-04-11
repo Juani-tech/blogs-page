@@ -7,13 +7,18 @@ const api = supertest(app);
 const Blog = require("../models/blog");
 const helper = require("./test_helper");
 
+// beforeEach(async () => {
+//   await Blog.deleteMany({});
+
+//   for (let blog of helper.initialBlogs) {
+//     let blogObject = new Blog(blog);
+//     await blogObject.save();
+//   }
+// });
+
 beforeEach(async () => {
   await Blog.deleteMany({});
-
-  for (let blog of helper.initialBlogs) {
-    let blogObject = new Blog(blog);
-    await blogObject.save();
-  }
+  await Blog.insertMany(helper.initialBlogs);
 });
 
 test("all blogs are returned", async () => {
@@ -86,6 +91,38 @@ test("undefined title or url gets 400 status code", async () => {
     title: "async/await refactors",
   };
   await api.post("/api/blogs").send(newBlog).expect(400);
+});
+
+test("succeds with status 204 if id is valid when deleting a blog", async () => {
+  const blogsAtStart = await helper.blogsInDb();
+  const blogToDelete = blogsAtStart[0];
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+  const blogsAtEnd = await helper.blogsInDb();
+
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1);
+
+  const titlesPostDelete = blogsAtEnd.map((blog) => {
+    return blog.title;
+  });
+
+  expect(titlesPostDelete).not.toContain(blogToDelete.title);
+});
+
+test("changing likes if id is valid succeds with status 200", async () => {
+  const blogsAtStart = await helper.blogsInDb();
+  const blogToModify = blogsAtStart[0];
+  const updatedBlogData = { likes: 200 };
+  await api
+    .put(`/api/blogs/${blogToModify.id}`)
+    .send(updatedBlogData)
+    .expect(200);
+
+  const blogsAtEnd = await helper.blogsInDb();
+  const likesAtEnd = blogsAtEnd.map((blog) => blog.likes);
+
+  expect(likesAtEnd).toContain(200);
 });
 
 afterAll(() => {
