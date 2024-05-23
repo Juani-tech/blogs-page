@@ -1,5 +1,6 @@
 const Blog = require("../models/blog");
 const User = require("../models/user");
+const bcrypt = require("bcrypt");
 
 const initialBlogs = [
   {
@@ -35,9 +36,29 @@ const usersInDb = async () => {
   return users.map((u) => u.toJSON());
 };
 
+const createTestUser = async () => {
+  await User.deleteMany({});
+  const passwordHash = await bcrypt.hash("password", 10);
+  const user = new User({ username: "testuser", passwordHash });
+  await user.save();
+  return user;
+};
+
+const initializeBlogs = async () => {
+  await Blog.deleteMany({}); // Limpia la colección de blogs
+  const testUser = await createTestUser(); // Crea el usuario de prueba
+
+  initialBlogs.forEach((blog) => (blog.user = testUser._id));
+
+  const blogPromises = initialBlogs.map((blog) => new Blog(blog).save());
+  await Promise.all(blogPromises);
+};
+
 module.exports = {
   initialBlogs,
   nonExistingId,
   blogsInDb,
   usersInDb,
+  createTestUser,
+  initializeBlogs,
 };
